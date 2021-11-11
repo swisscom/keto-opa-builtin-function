@@ -1,4 +1,4 @@
-package pkg
+package opa_keto
 
 import (
 	"fmt"
@@ -11,21 +11,27 @@ import (
 	"time"
 )
 
-func RegisterExpandFuncs()  {
+/*
+	RegisterExpand registers the ketoExpand(relation, namespace, object) function
+*/
+func RegisterExpand() {
 	rego.RegisterBuiltin3(
 		&rego.Function{
-			Name:    "ketoExpand",
+			Name:    KetoExpand,
 			Decl:    types.NewFunction(types.Args(types.S, types.S, types.S), types.Any{}),
 			Memoize: true,
 		},
-		func(bctx rego.BuiltinContext, a, b, c*ast.Term) (*ast.Term, error) {
+		func(bctx rego.BuiltinContext, a, b, c *ast.Term) (*ast.Term, error) {
 			var namespace, relation, object string
+			var err error
 
 			if err := ast.As(a.Value, &relation); err != nil {
 				return nil, err
-			} else if err = ast.As(b.Value, &namespace); err != nil {
+			}
+			if err = ast.As(b.Value, &namespace); err != nil {
 				return nil, err
-			} else if err = ast.As(c.Value, &object); err != nil {
+			}
+			if err = ast.As(c.Value, &object); err != nil {
 				return nil, err
 			}
 
@@ -34,8 +40,7 @@ func RegisterExpandFuncs()  {
 			getExpandParams.Relation = relation
 			getExpandParams.Namespace = namespace
 			getExpandParams.Object = object
-			maxDepth := int64(100)
-			getExpandParams.MaxDepth = &maxDepth
+			getExpandParams.MaxDepth = 100
 			expandPayload, err := ketoClient.Read.GetExpand(getExpandParams)
 			if err != nil {
 				fmt.Println(err.Error())
