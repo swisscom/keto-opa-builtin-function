@@ -22,10 +22,11 @@ You can then run it as you would with a normal OPA container.
 
 Within your policy, you'll be able to use the following new functions:
 
-- ``
+- `ketoCheck(subject, relation, namespace, object)`
+- `ketoExpand(relation, namespace, object)`
 
 ```rego
-
+# TODO: Complete rego policy example
 ```
 
 ## Attribution
