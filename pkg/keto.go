@@ -2,6 +2,7 @@ package opa_keto
 
 import (
 	"github.com/ory/keto-client-go/client"
+	"net/url"
 	"os"
 )
 
@@ -13,6 +14,12 @@ var cfg = &client.TransportConfig{
 
 func Init() {
 	if ketoUrl, exists := os.LookupEnv(KetoUrlEnv); exists {
-		cfg.Host = ketoUrl
+		u, err := url.Parse(ketoUrl)
+		if err != nil {
+			panic(err)
+		}
+		cfg.Host = u.Host
+		cfg.BasePath = u.Path
+		cfg.Schemes = []string{u.Scheme}
 	}
 }
