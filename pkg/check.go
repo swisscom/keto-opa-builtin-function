@@ -53,10 +53,19 @@ func RegisterCheck() {
 			checkPayload, err := ketoClient.Read.GetCheck(getCheckParams)
 
 			if err != nil {
-				fmt.Println(err.Error())
-				return nil, err
+				switch err.(type) {
+				case *read.GetCheckForbidden:
+					resultTupleTerm := ast.Item(ast.StringTerm("result"), ast.BooleanTerm(false))
+					explanationTupleTerm := ast.Item(ast.StringTerm("explanation"), ast.StringTerm(
+						fmt.Sprintf("Subject %s doesn't have %s relationship with object %s in namespace %s",
+							subject, relation, object, namespace)))
+					return ast.ObjectTerm(resultTupleTerm, explanationTupleTerm), nil
+				default:
+					fmt.Printf("getcheck failed: %v", err)
+					return nil, err
+				}
 			}
-			fmt.Println(checkPayload.Payload.Allowed)
+
 			resultTupleTerm := ast.Item(ast.StringTerm("result"), ast.BooleanTerm(*checkPayload.Payload.Allowed))
 			explanationTupleTerm := ast.Item(ast.StringTerm("explanation"), ast.StringTerm(
 				fmt.Sprintf("User %s has a %s relationship with object %s in namespace %s", subject,
